@@ -50,6 +50,9 @@ void PSTwo::tick(void (*driver)(float butDist, float rad)) {
 
 
     if (button == PSB_START) {
+        HAL_GPIO_WritePin(BUZZER_PORT, BUZZER_PIN, GPIO_PIN_SET);
+        HAL_Delay(10);
+        HAL_GPIO_WritePin(BUZZER_PORT, BUZZER_PIN, GPIO_PIN_RESET);
         isStart = !isStart;
     }
     if (!isStart) return;
