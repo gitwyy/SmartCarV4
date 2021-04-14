@@ -49,15 +49,45 @@ void Ackermann::tick() {
     wheelR->tick();
 }
 
+/**
+ * 线速度，左右轮速度，和角速度的关系
+ * w : 角速度
+ * R : 转弯半径
+ * V : 线速度
+ * a : 后轮轮距
+ * V = w * R
+ * VL = w * (R - 0.5 * a) = V - w * 0.5 * a
+ * VR = w * (R + 0.5 * a) = V + w * 0.5 * a
+ * w = (VL - VR) / a
+ * **************** ***************
+ * R: 转弯半径
+ * L: 前后轮轴距
+ * V/R = Vl/Rl = Vr/Rr
+ * tan(rad) = L / R => R = L/tan(rad)
+ * Rl = R - T/2
+ * Rr = R + T/2
+ *
+ * 根据以上公式 可推导出:
+ * Vl = V / R * Rl
+ * Vl = V / R * (R - T/2)
+ * Vl = V * (1 - T/2 * R)
+ * Vl = V * (1 - T * tan(rad) / 2*L)
+ * 同理：
+ * Vr = V * (1 + T * tan(rad) / 2*L)
+ * @param vel
+ * @param rad
+ */
 void Ackermann::updateVel(float vel, float rad) {
     this->servo->setRadian(rad);
-//    float velL = vel * (1 - WHEEL_DISTANCE * tan(rad) / (2 * WHEEL_AXIS));
-//    float velR = vel * (1 + WHEEL_DISTANCE * tan(rad) / (2 * WHEEL_AXIS));
+    rad = this->servo->getRadian();
+    float velL = vel * (1 - WHEEL_DISTANCE * tan(rad) / (2 * WHEEL_AXIS));
+    float velR = vel * (1 + WHEEL_DISTANCE * tan(rad) / (2 * WHEEL_AXIS));
 
-    //左边轮子速度
-    float velL = vel - rad * 0.5 * WHEEL_DISTANCE;
-    //右边轮子速度
-    float velR = vel + rad * 0.5 * WHEEL_DISTANCE;
+//    float w = this->getAngularVel();
+//    //左边轮子速度
+//    float velL = vel - rad * w * WHEEL_DISTANCE;
+//    //右边轮子速度
+//    float velR = vel + rad * w * WHEEL_DISTANCE;
 
     this->wheelL->setTargetVel(velL);
     this->wheelR->setTargetVel(velR);
@@ -74,7 +104,7 @@ float Ackermann::getAngularVel() {
     float velL = wheelL->getCurVel();
     float velR = wheelR->getCurVel();
 
-    return (-velL + velR) / (2 * WHEEL_DISTANCE * 0.5);
+    return (-velL + velR) / WHEEL_DISTANCE;
 }
 
 float Ackermann::getTargetVel() {
@@ -120,3 +150,5 @@ void Ackermann::showOled() {
 float Ackermann::getRadian() {
     return this->servo->getRadian();
 }
+
+
