@@ -6,7 +6,6 @@
 #include "obj/Ackermann.h"
 #include "util/RobotLog.h"
 #include "obj/PSTwo.h"
-#include "obj/Buzzer.h"
 #include "config/protocol.h"
 #include "util/common_uart.h"
 #include "lib/mpu9250.h"
@@ -24,6 +23,7 @@ PSTwo psTwo(PS_DI_PORT, PS_DI_PIN, PS_DO_PORT, PS_DO_PIN, PS_CS_PORT, PS_CS_PIN,
 void SmartcarRobotInit() {
     car.init();
     psTwo.init();
+    common_uart_init();
     logdebug("smart car robot init success");
 }
 
@@ -38,7 +38,7 @@ void SmartcarRobotTick() {
     car.tick();
     car.showOled();
     psTwo.tick(psTwoDriver);
-//    pushInfo();
+    pushInfo();
 }
 
 void psTwoDriver(float butDist, float rad) {
@@ -61,7 +61,6 @@ void commonDriver(float vel, float rad) {
  * @see config/protocol.h
  */
 void common_uart_idle_callback(uint8_t receive_buf[], uint16_t receive_len) {
-    loginfo(">>>>>>>>>>>>>>>>>>>>>>>>>>>>> %d, %s", receive_len, receive_buf);
     if (receive_len < 4) return;
     int i = 0;
     while (i < receive_len) {
@@ -83,7 +82,8 @@ void common_uart_idle_callback(uint8_t receive_buf[], uint16_t receive_len) {
         if (data_type == TYPE_UPDATE_VEL) {
             update_vel(cmd);
         }
-        delete cmd;
+        delete[] cmd;
+        i += data_len;
     }
 }
 
@@ -99,7 +99,6 @@ void common_uart_idle_callback(uint8_t receive_buf[], uint16_t receive_len) {
  * Ð­Òé½áÎ²
  */
 void update_vel(uint8_t cmd[]) {
-    car.buzzer->toggle();
     uint8_t vel_low = cmd[4];
     uint8_t vel_high = cmd[5];
     short vel = vel_high << 8 | vel_low;

@@ -5,6 +5,7 @@
 #include "common_uart.h"
 #include "stm32f1xx_hal.h"
 #include <string.h>
+#include "RobotLog.h"
 
 // 定义缓冲区的大小
 const uint32_t BUFFER_SIZE = 255;
@@ -28,21 +29,22 @@ void common_uart_init() {
  * @param huart1
  */
 void common_uart_idle_handle(UART_HandleTypeDef *huart1) {
-
+//    common_uart_send(uart_rx_buff, BUFFER_SIZE);
     if (USART1 == huart1->Instance) {
+//        common_uart_send(uart_rx_buff, BUFFER_SIZE);
         // 判断是否是空闲中断
         if (RESET != __HAL_UART_GET_FLAG(huart1, UART_FLAG_IDLE)) {
+//            common_uart_send(uart_rx_buff, BUFFER_SIZE);
             // 计算接收到的数据长度
             uint32_t data_length = BUFFER_SIZE - __HAL_DMA_GET_COUNTER(&hdma_usart1_rx);
             __HAL_UART_CLEAR_IDLEFLAG(huart1);
             // 停止本次DMA传输
             HAL_UART_DMAStop(huart1);
-            // 将数据丢给外部去处理
             while (HAL_UART_Receive_DMA(huart1, uart_rx_buff, BUFFER_SIZE) != HAL_OK) {
                 huart1->RxState = HAL_UART_STATE_READY;
                 __HAL_UNLOCK(huart1);
+//                common_uart_send(uart_rx_buff, BUFFER_SIZE);
             }
-
             // 数据处理的回调
             common_uart_idle_callback(uart_rx_buff, data_length);
         }
@@ -65,7 +67,8 @@ void common_uart_send(uint8_t *data, uint16_t size) {
 
 
 /* 中断错误处理函数，在此处理overrun错误 */
-void HAL_UART_ErrorCallback1(UART_HandleTypeDef *huart) {
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
+    loginfo("call back error ");
     if (__HAL_UART_GET_FLAG(huart, UART_FLAG_PE) != RESET) {
         __HAL_UART_CLEAR_OREFLAG(huart);
     }
