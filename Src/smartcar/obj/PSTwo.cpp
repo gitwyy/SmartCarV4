@@ -40,6 +40,7 @@ void PSTwo::tick(void (*driver)(float butDist, float rad)) {
     if (HAL_GetTick() - update_time < PS_CHECK_RATE) {
         return;
     }
+    update_time = HAL_GetTick();
     button = readButtonData();
 
     joystickLeftX = readAnalogData(PSS_LX);
@@ -47,13 +48,13 @@ void PSTwo::tick(void (*driver)(float butDist, float rad)) {
     joystickRightX = readAnalogData(PSS_RX);
     joystickRightY = readAnalogData(PSS_RY);
 
-
     if (button == PSB_START) {
         HAL_GPIO_WritePin(BUZZER_PORT, BUZZER_PIN, GPIO_PIN_SET);
-        HAL_Delay(500);
+        HAL_Delay(PS_CHECK_RATE - 10);
         HAL_GPIO_WritePin(BUZZER_PORT, BUZZER_PIN, GPIO_PIN_RESET);
         isStart = !isStart;
     }
+
     if (!isStart) return;
 
     float llen = getLLen();
@@ -73,7 +74,6 @@ void PSTwo::tick(void (*driver)(float butDist, float rad)) {
             HAL_GPIO_WritePin(BUZZER_PORT, BUZZER_PIN, GPIO_PIN_RESET);
             break;
     }
-    update_time = HAL_GetTick();
 }
 
 uint8_t PSTwo::readButtonData() {

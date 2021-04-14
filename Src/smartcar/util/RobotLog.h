@@ -8,12 +8,12 @@
 /************************ 定义 log *************************/
 #include <stdio.h>
 
-#define LOG_ENABLE 1
+#define LOG_ENABLE 0
 #define LOG_DEBUG 0
 #if LOG_ENABLE
 #define loginfo(format, ...) printf(format"\r\n",##__VA_ARGS__)
 #else
-#define loginfo(format,...)
+#define loginfo(format, ...)
 #endif
 
 #if LOG_ENABLE & LOG_DEBUG
