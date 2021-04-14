@@ -16,14 +16,14 @@ Wheel::Wheel(Motor *motor, Encoder *encoder) {
 void Wheel::init() {
     this->encoder->init();
     this->motor->init();
-    loginfo("wheel init success");
+    logdebug("wheel init success");
 }
 
 void Wheel::tick() {
     if (this->updateVel()) {
         float pwm = this->pid->compute(this->targetVel, this->curVel);
         this->motor->spin(pwm);
-        loginfo("vel=%f tar=%f pwm=%f \r\n", curVel, targetVel, pwm);
+        logdebug("vel=%f tar=%f pwm=%f \r\n", curVel, targetVel, pwm);
     }
 }
 
